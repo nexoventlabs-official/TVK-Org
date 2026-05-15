@@ -8,23 +8,23 @@ async function updateAdminPassword() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('[updatePassword] connected to MongoDB');
 
-    const email = process.env.DEFAULT_ADMIN_EMAIL || 'admin@venkatraman.in';
-    const newPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'VenkatAdmin2026!Secure';
+    const email = (process.env.DEFAULT_ADMIN_EMAIL || 'admin@venkatraman.in').toLowerCase();
+    const newPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'admin@123';
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const passwordHash = await bcrypt.hash(newPassword, 10);
 
-    const result = await Admin.findOneAndUpdate(
-      { email },
-      { password: hashedPassword },
-      { new: true }
-    );
-
-    if (result) {
-      console.log(`[updatePassword] ✓ Password updated for ${email}`);
-      console.log(`[updatePassword] New password: ${newPassword}`);
+    let admin = await Admin.findOne({ email });
+    if (!admin) {
+      admin = new Admin({ email, name: 'Admin', passwordHash, active: true });
+      await admin.save();
+      console.log(`[updatePassword] ✓ Admin created: ${email}`);
     } else {
-      console.log(`[updatePassword] ✗ Admin not found: ${email}`);
+      admin.passwordHash = passwordHash;
+      admin.active = true;
+      await admin.save();
+      console.log(`[updatePassword] ✓ Password updated for ${email}`);
     }
+    console.log(`[updatePassword] New password: ${newPassword}`);
 
     process.exit(0);
   } catch (err) {
