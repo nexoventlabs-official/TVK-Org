@@ -2,7 +2,7 @@
     "buildCommand": "npm run build",
     "outputDirectory": "dist/client",
     "framework": null,
-    "installCommand": "npm install",
+    "installCommand": "npm install --legacy-peer-deps",
     "rewrites": [
         { "source": "/((?!assets/|.*\\..*).*)", "destination": "/index.html" }
     ]
